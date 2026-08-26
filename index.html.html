@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마켓런 보령 : 모바일 힌트 센터</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-card: #1e293b;
+            --bg-inner: #334155;
+            --accent-gold: #f59e0b;
+            --accent-amber: #d97706;
+            --accent-blue: #0284c7;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --text-muted: #cbd5e1;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 10px;
+        }
+
+        /* Mobile Container Frame */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: #0f172a;
+            border-radius: 24px;
+            border: 1px solid #334155;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 840px;
+        }
+
+        /* App Header */
+        .app-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 24px 20px 18px;
+            border-bottom: 2px solid var(--accent-amber);
+            position: relative;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .badge-tag {
+            background: var(--accent-amber);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .emergency-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .app-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .app-title span {
+            color: var(--accent-gold);
+        }
+
+        .app-subtitle {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        /* Search & Filter Bar */
+        .filter-section {
+            padding: 16px 20px 10px;
+            background-color: #1e293b;
+        }
+
+        .episode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: var(--text-sub);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-amber);
+            color: #fff;
+            border-color: var(--accent-gold);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 38px;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+
+        /* Stage List */
+        .stage-list {
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .stage-card {
+            background-color: var(--bg-card);
+            border-radius: 14px;
+            border: 1px solid #334155;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .stage-card.open {
+            border-color: var(--accent-gold);
+        }
+
+        .stage-header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background-color: #1e293b;
+        }
+
+        .stage-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stage-number {
+            width: 36px;
+            height: 36px;
+            background: #0f172a;
+            border: 1px solid var(--accent-amber);
+            color: var(--accent-gold);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .stage-title-text h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .stage-title-text p {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .toggle-icon {
+            color: var(--text-sub);
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+
+        .stage-card.open .toggle-icon {
+            transform: rotate(180deg);
+            color: var(--accent-gold);
+        }
+
+        /* Hint Content Inside Stage */
+        .hint-body {
+            display: none;
+            padding: 16px;
+            border-top: 1px solid #334155;
+            background-color: #162032;
+        }
+
+        .stage-card.open .hint-body {
+            display: block;
+        }
+
+        .hint-step {
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .hint-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .step-title {
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-1-title { color: var(--accent-blue); }
+        .step-2-title { color: var(--accent-gold); }
+        .step-3-title { color: var(--success); }
+
+        .reveal-btn {
+            background: #334155;
+            color: var(--text-muted);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reveal-btn:hover {
+            background: #475569;
+            color: #fff;
+        }
+
+        .hint-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: none;
+            padding-top: 8px;
+            border-top: 1px dashed #334155;
+            margin-top: 6px;
+        }
+
+        .hint-text.revealed {
+            display: block;
+        }
+
+        .answer-box {
+            background-color: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .answer-box.revealed {
+            display: block;
+        }
+
+        .answer-title {
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .answer-code {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        /* Footer Info */
+        .app-footer {
+            padding: 16px 20px;
+            background-color: #1e293b;
+            border-top: 1px solid #334155;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        .footer-logo {
+            font-weight: 900;
+            color: var(--accent-gold);
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        /* Modal Caution */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background-color: #1e293b;
+            border: 1px solid var(--accent-gold);
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+
+        .modal-icon {
+            font-size: 36px;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .modal-btn.cancel {
+            background: #334155;
+            color: #fff;
+        }
+
+        .modal-btn.confirm {
+            background: var(--accent-amber);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-top">
+                <span class="badge-tag">마켓런 · 보령 모바일 힌트</span>
+                <button class="emergency-btn" onclick="callOperator()">
+                    <i class="fa-solid fa-headset"></i> 운영진 문의
+                </button>
+            </div>
+            <h1 class="app-title">1851 보령 상무사<br><span>비밀 지령 힌트 센터</span></h1>
+            <p class="app-subtitle">풀기 어려운 미션의 스테이지를 선택해 단계별 힌트를 확인하세요.</p>
+        </header>
+
+        <!-- Filter & Search -->
+        <section class="filter-section">
+            <div class="episode-tabs">
+                <button class="tab-btn active" onclick="filterEpisode('all')">전체 보기</button>
+                <button class="tab-btn" onclick="filterEpisode('ep1')">1편 중앙시장</button>
+                <button class="tab-btn" onclick="filterEpisode('ep2')">2편 한내·동부·현대</button>
+            </div>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" onkeyup="searchStage()" placeholder="스테이지 번호 또는 장소 검색 (예: STAGE 1, 패션거리)">
+            </div>
+        </section>
+
+        <!-- Stage List -->
+        <main class="stage-list" id="stageList">
+
+            <!-- STAGE 1 -->
+            <div class="stage-card ep1" data-stage="1" data-keywords="1 패션거리 중앙시장 문패 원홍주">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S1</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 1 · 패션거리 옛 문패</h3>
+                            <p>보령중앙시장 패션거리 골목</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">패션거리 골목 입구부터 옛 상점 간판 위쪽 모서리를 천천히 살펴보고, 빨간색 테두리 상자를 찾아보세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">문패 모서리에 한 글자씩 적힌 한글 세 글자를 모으면 1851년 보령 보부상 조직의 이름이 완성됩니다.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">입력할 정답</div>
+                            <div class="answer-code">원홍주</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 2 -->
+            <div class="stage-card ep1" data-stage="2" data-keywords="2 로컬푸드 젓갈 장부 매대">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S2</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 2 · 로컬푸드 & 젓갈 노포</h3>
+                            <p>중앙시장 로컬푸드·젓갈 골목</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">협력 점포 매대 앞의 QR코드①를 카메라로 스캔한 후 공개되는 수수께끼 품목을 확인하세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">'김 3속, 까나리액젓 2단지, 육젓 1옹기'의 현재 매대 판매 가격 중 첫 번째 자리 숫자를 모두 합산하세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">입력할 정답</div>
+                            <div class="answer-code">18</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 3 -->
+            <div class="stage-card ep1" data-stage="3" data-keywords="3 아케이드 고지도 장날 38">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S3</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 3 · 시장 아케이드 사거리</h3>
+                            <p>중앙시장 중심 아케이드</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">중앙 아케이드 기둥에 부착된 숫자 표지판과 리플릿 속 고지도 기둥 번호를 맞춰보세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">보령 대천 전통 오일장이 열리는 정기 장날 날짜 숫자 2개를 순서대로 조합하세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">입력할 정답</div>
+                            <div class="answer-code">38 (또는 3, 8)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 4 -->
+            <div class="stage-card ep1" data-stage="4" data-keywords="4 장터마루 비밀상자 자물쇠 1929">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S4</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 4 · 장터마루 (1편 피날레)</h3>
+                            <p>중앙시장 2층 문화공간 장터마루</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">장터마루에 놓인 비밀 상자의 4자리 다이얼 자물쇠 수식을 확인하세요: [STAGE 2 값] + [장날(38)] + [51]</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">18 + 38 + 51 을 계산하거나, 대천장이 최초로 개설된 역사적인 연도(4자리)를 생각해보세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">자물쇠 비밀번호</div>
+                            <div class="answer-code">1929</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 5 -->
+            <div class="stage-card ep2" data-stage="5" data-keywords="5 먹거리 한내시장 영수증 칼국수">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S5</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 5 · 먹거리골목 (영수증 인증)</h3>
+                            <p>한내시장 먹거리골목</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">한내시장 먹거리 골목에서 5,000원 이상 이용 후 받은 종이 영수증을 준비하세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">영수증 사진을 챗봇 카메라인증 창에 올리거나, 영수증 승인번호 뒤 4자리를 입력하세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">입력 방식</div>
+                            <div class="answer-code">영수증 승인번호 입력</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 6 -->
+            <div class="stage-card ep2" data-stage="6" data-keywords="6 어물전 한내시장 상인 굴 간재미">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S6</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 6 · 수산물 어물전 (상인 문답)</h3>
+                            <p>한내시장 어물전 골목</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">어물전 지정 협력 점포 사장님께 "보령 바다의 삼총사가 무엇입니까?"라고 물어보세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">사장님이 말해주신 세 가지 제철 수산물 이름(굴, 간재미, 물메기)을 띄어쓰기로 입력하세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">입력할 정답</div>
+                            <div class="answer-code">굴 간재미 물메기</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 7 -->
+            <div class="stage-card ep2" data-stage="7" data-keywords="7 동부시장 방앗간 기름 소리 퍼즐">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S7</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 7 · 동부시장 방앗간골목</h3>
+                            <p>동부시장 참기름·방앗간 골목</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">방앗간 골목에서 들리는 세 가지 기계 소리(1.덜컹, 2.쿵덕, 3.찌잉)의 들리는 순서를 파악하세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">고추방아 ➔ 기름틀 ➔ 떡방아 순서대로 기계 번호를 나열하면 2-1-3 입니다.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">입력할 정답</div>
+                            <div class="answer-code">213 (또는 2-1-3)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 8 -->
+            <div class="stage-card ep2" data-stage="8" data-keywords="8 현대시장 포토존 완주 피날레 스탬프">
+                <div class="stage-header" onclick="toggleStage(this)">
+                    <div class="stage-info">
+                        <div class="stage-number">S8</div>
+                        <div class="stage-title-text">
+                            <h3>STAGE 8 · 현대시장 포토존 (피날레)</h3>
+                            <p>현대시장 포토존 & 완주 거점</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="hint-body">
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-1-title"><i class="fa-regular fa-lightbulb"></i> 힌트 1단계 (탐색 방향)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">현대시장 레트로 포토존 벽면의 옛 사진 구도와 똑같이 팀원들과 함께 포즈를 취해 사진을 찍으세요.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-2-title"><i class="fa-solid fa-lightbulb"></i> 힌트 2단계 (핵심 단서)</span>
+                            <button class="reveal-btn" onclick="requestReveal(this)">힌트 열기</button>
+                        </div>
+                        <div class="hint-text">인증 사진을 챗봇에 업로드하고, 포토존 옆 QR코드④를 스캔하면 스탬프 4개가 모두 완성됩니다.</div>
+                    </div>
+                    <div class="hint-step">
+                        <div class="step-header">
+                            <span class="step-title step-3-title"><i class="fa-solid fa-key"></i> 최종 정답 공개</span>
+                            <button class="reveal-btn" onclick="requestReveal(this, true)">정답 보기</button>
+                        </div>
+                        <div class="answer-box">
+                            <div class="answer-title">완주 보상</div>
+                            <div class="answer-code">온누리상품권 5,000원 수령</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-logo">MARKET RUN BORYEONG</div>
+            <p>전국 전통시장 게이미피케이션 프로젝트 · 제이엘파트너</p>
+            <p>© 2026 Boryeong Market Run. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Spoiler Caution Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-card">
+            <i class="fa-solid fa-triangle-exclamation modal-icon"></i>
+            <h4 class="modal-title">힌트를 확인하시겠습니까?</h4>
+            <p class="modal-desc">미션을 스스로 해결했을 때 가장 재미있습니다!<br>정말 힌트를 확인하시겠습니까?</p>
+            <div class="modal-btns">
+                <button class="modal-btn cancel" onclick="closeModal()">취소</button>
+                <button class="modal-btn confirm" onclick="confirmReveal()">열기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTargetBtn = null;
+        let isAnswerType = false;
+
+        function toggleStage(headerElement) {
+            const card = headerElement.parentElement;
+            const isOpen = card.classList.contains('open');
+            
+            // Close all
+            document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('open'));
+            
+            // Toggle clicked
+            if (!isOpen) {
+                card.classList.add('open');
+            }
+        }
+
+        function filterEpisode(ep) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const cards = document.querySelectorAll('.stage-card');
+            cards.forEach(card => {
+                if (ep === 'all') {
+                    card.style.display = 'block';
+                } else if (card.classList.contains(ep)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function searchStage() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.stage-card');
+
+            cards.forEach(card => {
+                const keywords = card.getAttribute('data-keywords').toLowerCase();
+                if (keywords.includes(input)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function requestReveal(btn, isAnswer = false) {
+            currentTargetBtn = btn;
+            isAnswerType = isAnswer;
+            
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('active');
+            currentTargetBtn = null;
+        }
+
+        function confirmReveal() {
+            if (currentTargetBtn) {
+                const stepBox = currentTargetBtn.closest('.hint-step');
+                const hintText = stepBox.querySelector('.hint-text');
+                const answerBox = stepBox.querySelector('.answer-box');
+
+                if (hintText) hintText.classList.add('revealed');
+                if (answerBox) answerBox.classList.add('revealed');
+
+                currentTargetBtn.style.display = 'none';
+            }
+            closeModal();
+        }
+
+        function callOperator() {
+            alert("운영진 직통 전화(010-0000-0000) 또는 카카오톡 챗봇 '운영진 상담'으로 연결합니다.");
+        }
+    </script>
+</body>
+</html>
