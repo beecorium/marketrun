@@ -1,0 +1,24 @@
+'use client';
+import { useRef, useState } from 'react';
+import { Minus, Plus, RotateCcw, MapPin } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+const stops = [
+ { name:'망루', task:'미션 1 · 세 불빛 밝히기', detail:'대천1동 행정복지센터 인근', x:1411,y:151 },
+ { name:'한내시장 쉼터', task:'미션 2 · 긴급방송 해독', detail:'라디오방송국 옆 쉼터',x:971,y:808 },
+ { name:'포목거리',task:'탐색 구간 · 별도 QR 없음',detail:'이동하며 황금빛 단서를 찾아 기억하세요.',x:515,y:500 },
+ { name:'보부상 조형물',task:'미션 3 · 황금 인장 획득',detail:'마실카페 앞 · 보령시 중앙시장2길 9',x:320,y:385 },
+];
+export default function JourneyMap({open,onOpenChange}:{open:boolean;onOpenChange:(v:boolean)=>void}){
+ const [zoom,Z]=useState(1);const [selected,S]=useState<number|null>(null);const view=useRef<HTMLDivElement>(null);const drag=useRef<{x:number;y:number;left:number;top:number}|null>(null);
+ function focus(i:number){S(i);Z(2.5);requestAnimationFrame(()=>requestAnimationFrame(()=>{const v=view.current;if(!v)return;v.scrollTo({left:(stops[i].x-180)/1350*v.scrollWidth-v.clientWidth/2,top:(stops[i].y-65)/850*v.scrollHeight-v.clientHeight/2,behavior:'smooth'});}));}
+ function resize(n:number){const v=view.current;const rx=v?(v.scrollLeft+v.clientWidth/2)/v.scrollWidth:.5;const ry=v?(v.scrollTop+v.clientHeight/2)/v.scrollHeight:.5;Z(n);requestAnimationFrame(()=>{if(v)v.scrollTo({left:rx*v.scrollWidth-v.clientWidth/2,top:ry*v.scrollHeight-v.clientHeight/2});});}
+ return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="g-dialog g-route-dialog"><DialogTitle>황금 패랭이 미션 지도</DialogTitle>
+ <div className="g-map-controls"><span aria-live="polite">{Math.round(zoom*100)}%</span><div><button aria-label="지도 축소" disabled={zoom<=1} onClick={()=>resize(Math.max(1,zoom-.5))}><Minus size={20}/></button><button aria-label="지도 확대" disabled={zoom>=4} onClick={()=>resize(Math.min(4,zoom+.5))}><Plus size={20}/></button><button onClick={()=>{Z(1);S(null);view.current?.scrollTo(0,0);}}><RotateCcw size={17}/>전체</button></div></div>
+ <div className="g-map-scroll" ref={view} tabIndex={0} aria-label="확대 가능한 이동 지도. 확대 후 손가락으로 이동하세요." onPointerDown={e=>{if(e.pointerType==='mouse'){e.currentTarget.setPointerCapture(e.pointerId);drag.current={x:e.clientX,y:e.clientY,left:e.currentTarget.scrollLeft,top:e.currentTarget.scrollTop};}}} onPointerMove={e=>{if(drag.current){e.currentTarget.scrollLeft=drag.current.left-(e.clientX-drag.current.x);e.currentTarget.scrollTop=drag.current.top-(e.clientY-drag.current.y);}}} onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}}>
+ <div style={{width:`${zoom*100}%`,minWidth:'100%'}} className="g-map-art"><svg viewBox="180 65 1350 850" role="img" aria-label="망루에서 한내시장 쉼터로 내려온 뒤 포목거리를 지나 마실카페 앞 보부상 조형물로 이동하는 경로"><defs><marker id="gold-route-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#007b78"/></marker></defs><image href="/images/market-run-map.png" x="0" y="0" width="2048" height="1032"/><path d="M1390 188 L1020 794 L676 655 L710 548 L366 431 L320 400" fill="none" stroke="white" strokeWidth="18" strokeLinejoin="round"/><g fill="none" stroke="#007b78" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"><path d="M1390 188 L1030 777" markerEnd="url(#gold-route-arrow)"/><path d="M987 784 L676 655 L710 548" markerEnd="url(#gold-route-arrow)"/><path d="M696 540 L361 426" markerEnd="url(#gold-route-arrow)"/></g>
+ {stops.map((p,i)=><g key={p.name}><circle cx={p.x} cy={p.y} r={selected===i?36:30} fill={i===2?'#f7cc6c':'#142e4c'} stroke="white" strokeWidth="6"/><text x={p.x} y={p.y+11} textAnchor="middle" fontSize="32" fontWeight="800" fill={i===2?'#142e4c':'white'}>{i+1}</text></g>)}
+ <g fontFamily="sans-serif" fontWeight="800" fontSize="29" fill="#142e4c"><rect x="1100" y="80" width="250" height="67" rx="12" fill="white" stroke="#142e4c" strokeWidth="2"/><text x="1120" y="124">① 망루 · 출발</text><rect x="1040" y="784" width="280" height="66" rx="12" fill="white" stroke="#142e4c" strokeWidth="2"/><text x="1060" y="827">② 한내시장 쉼터</text><rect x="430" y="550" width="240" height="64" rx="12" fill="#fff3cf" stroke="#cf9d38" strokeWidth="2"/><text x="450" y="592">③ 포목거리</text><rect x="205" y="274" width="350" height="65" rx="12" fill="white" stroke="#142e4c" strokeWidth="2"/><text x="225" y="317">④ 보부상 조형물 · 도착</text></g></svg></div></div>
+ <p className="g-map-help">＋로 확대하고 손가락으로 밀어보세요. 아래 장소를 누르면 해당 위치가 확대됩니다.</p>
+ <ol className="g-route-stops">{stops.map((p,i)=><li key={p.name}><button onClick={()=>focus(i)} aria-pressed={selected===i}><span className={'g-stop-number '+(i===2?'explore':'')}>{i+1}</span><span><strong>{p.name}</strong><b>{p.task}</b><small>{p.detail}</small></span><MapPin size={19}/></button></li>)}</ol>
+ </DialogContent></Dialog>;
+}
