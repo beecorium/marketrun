@@ -2,7 +2,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {Lamp,LockKeyhole,Check,MapPin,Stamp,Camera,ExternalLink,ShieldCheck} from 'lucide-react';
 import {Dialog,DialogContent,DialogTitle,DialogDescription} from '@/components/ui/dialog';
-import {Slider} from '@/components/ui/slider';
 import {allowed,advance,fresh,key,normalize,type Journey} from './progress';
 import './style.css';
 import './enhancements.css';
@@ -12,11 +11,11 @@ const titles=['망루의 세 불빛을 밝혀라','보령 3미를 찾아라!','�
 const prizes=['갓끈','동백꽃 장식','황금 인장'];
 const prizeImages=['/images/reward-gatstrap.png','/images/reward-camellia.png','/images/reward-golden-seal.png'];
 export default function Golden(){
- const [s,S]=useState<Journey>(fresh());const [step,T]=useState(0);const [ready,R]=useState(false);const [input,I]=useState('');const [message,M]=useState('');const [awake,A]=useState(false);const [hint,H]=useState(0);const [map,D]=useState(false);const [photo,P]=useState(false);const [config,F]=useState<{surveyUrl:string;benefits:{shop:string;benefit:string}[]}|null>(null);const [configError,E]=useState(false);const [storageError,SE]=useState(false);const [surveyOpened,SO]=useState(false);const [rewardReady,RR]=useState(false);const [rewardTime,RT]=useState('');
+ const [s,S]=useState<Journey>(fresh());const [step,T]=useState(0);const [ready,R]=useState(false);const [input,I]=useState('');const [message,M]=useState('');const [awake,A]=useState(false);const [hint,H]=useState(0);const [map,D]=useState(false);const [photo,P]=useState(false);const [config,F]=useState<{surveyUrl:string;mission1Answers:string[];mission2Code:string;mission3Answers:string[];benefits:{shop:string;benefit:string}[]}|null>(null);const [configError,E]=useState(false);const [storageError,SE]=useState(false);const [surveyOpened,SO]=useState(false);const [rewardReady,RR]=useState(false);const [rewardTime,RT]=useState('');
  useEffect(()=>{document.title='황금 패랭이를 찾아라 | 2026 보령 꿀잼야행';const params=new URLSearchParams(location.search);const mission=params.get('mission');const n=mission===null?0:Number(mission);T([0,1,2,3,4].includes(n)?n:0);try{S(normalize(JSON.parse(localStorage.getItem(key)||'null')));}catch{SE(true);}R(true);const sync=()=>{try{S(normalize(JSON.parse(localStorage.getItem(key)||'null')));}catch{SE(true);}};window.addEventListener('storage',sync);fetch('/api/config',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(F).catch(()=>E(true));return()=>{window.removeEventListener('storage',sync);};},[]);
  const save=(next:Journey)=>{try{localStorage.setItem(key,JSON.stringify(next));S(next);M('');navigator.vibrate?.(100);return true;}catch{SE(true);M('진행 기록을 저장할 수 없습니다. 일반 브라우저에서 다시 열어주세요.');return false;}};
  const done=step===1?s.lanterns===3:step===2?s.goods===3:step===3?s.seal:false;
- function submit(e:React.FormEvent){e.preventDefault();if(!allowed(step,s))return;if(step===3){if(['소나무','황금소나무','황금송'].includes(input.replace(/\s/g,'').normalize('NFC'))){A(true);M('그래, 바로 황금송이었네! 황금 인장을 눌러 마지막 징표를 완성하게.');}else M('아직 봉인이 풀리지 않았습니다. 포목거리의 황금빛 단서를 떠올려보세요.');}else{const next=advance(step,input,s);if(next){save(next);M(step===1?'불빛이 깨어났습니다!':'보령 3미의 암호를 확인했습니다!');I('');}else M(step===1?'아직 깨어나지 않은 불빛입니다. 다음 등불의 글자를 확인해보세요.':'현장 보령 3미 카드의 숫자를 다시 확인하세요.');}}
+ function submit(e:React.FormEvent){e.preventDefault();if(!allowed(step,s))return;if(step===3){const accepted=(config?.mission3Answers?.length?config.mission3Answers:['소나무','황금소나무','황금송']).map(v=>v.replace(/\s/g,'').normalize('NFC'));if(accepted.includes(input.replace(/\s/g,'').normalize('NFC'))){A(true);M('그래, 바로 황금송이었네! 황금 인장을 눌러 마지막 징표를 완성하게.');}else M('아직 봉인이 풀리지 않았습니다. 포목거리의 황금빛 단서를 떠올려보세요.');}else{const next=advance(step,input,s,{mission1Answers:config?.mission1Answers,mission2Code:config?.mission2Code});if(next){save(next);M(step===1?'불빛이 깨어났습니다!':'보령 3미의 암호를 확인했습니다!');I('');}else M(step===1?'아직 깨어나지 않은 불빛입니다. 다음 등불의 글자를 확인해보세요.':'현장 보령 3미 카드의 숫자를 다시 확인하세요.');}}
  function confirmSurvey(){const now=new Date();RT(now.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}));RR(true);window.scrollTo({top:0,behavior:'smooth'});}
  const link=(n:number)=>`/golden/?mission=${n}`;
  return <main className="golden">
@@ -34,14 +33,609 @@ export default function Golden(){
   {ready&&new URLSearchParams(typeof location==='undefined'?'':location.search).get('test')==='1'&&<button className="g-reset" onClick={()=>{if(confirm('신규 황금 패랭이 진행 기록만 초기화할까요?')){if(save(fresh()))location.href=link(1);}}}>테스트 기록 초기화</button>}
  </main>;
 }
-function Photo({onClose}:{onClose:()=>void}){
+function Photo({ onClose }: { onClose: () => void }) {
+  const video = useRef<HTMLVideoElement>(null);
+  const stream = useRef<MediaStream | null>(null);
+  const stage = useRef<HTMLDivElement>(null);
+  const active = useRef(true);
+
+  const [source, Source] = useState("");
+  const [live, Live] = useState(false);
+  const [facing, Facing] = useState<"user" | "environment">("user");
+  const [busy, Busy] = useState(false);
+  const [error, setError] = useState("");
+
+  const [x, X] = useState(50);
+  const [y, Y] = useState(24);
+  const [scale, Scale] = useState(55);
+  const [angle, Angle] = useState(0);
+
+  const [result, Result] = useState("");
+  const [blob, BlobState] = useState<Blob | null>(null);
+
+  const stop = () => {
+    stream.current?.getTracks().forEach((track) => track.stop());
+    stream.current = null;
+  };
+
+  useEffect(() => {
+    active.current = true;
+
+    return () => {
+      active.current = false;
+      stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (source) URL.revokeObjectURL(source);
+    };
+  }, [source]);
+
+  useEffect(() => {
+    return () => {
+      if (result) URL.revokeObjectURL(result);
+    };
+  }, [result]);
+
+  const choose = (file?: File) => {
+    if (!file) return;
+
+    stop();
+    Live(false);
+    Source(URL.createObjectURL(file));
+    Result("");
+    BlobState(null);
+    setError(
+      "사진을 불러왔습니다. 패랭이를 움직이고 크기와 기울기를 조절해주세요."
+    );
+  };
+
+  async function start(next: "user" | "environment" = facing) {
+    Busy(true);
+    setError("");
+    stop();
+    Live(false);
+
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("camera-not-supported");
+      }
+
+      const media = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: next },
+          width: { ideal: 1080 },
+          height: { ideal: 1350 },
+        },
+        audio: false,
+      });
+
+      if (!active.current) {
+        media.getTracks().forEach((track) => track.stop());
+        return;
+      }
+
+      stream.current = media;
+      Facing(next);
+      Source("");
+      Result("");
+
+      if (video.current) {
+        video.current.srcObject = media;
+        video.current.setAttribute("playsinline", "true");
+        await video.current.play();
+      }
+
+      Live(true);
+    } catch {
+      stop();
+      setError(
+        "실시간 카메라를 열 수 없습니다. 사진 촬영·앨범에서 선택을 이용해주세요."
+      );
+    } finally {
+      Busy(false);
+    }
+  }
+
+  async function load(src: string) {
+    const image = new Image();
+    image.src = src;
+    await image.decode();
+    return image;
+  }
+
+  async function freeze() {
+    if (!video.current || !live) return;
+
+    Busy(true);
+    setError("");
+
+    try {
+      const currentVideo = video.current;
+
+      if (!currentVideo.videoWidth || !currentVideo.videoHeight) {
+        throw new Error("camera-not-ready");
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1350;
+
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("canvas-not-supported");
+
+      const ratio = Math.max(
+        1080 / currentVideo.videoWidth,
+        1350 / currentVideo.videoHeight
+      );
+
+      context.save();
+
+      if (facing === "user") {
+        context.translate(1080, 0);
+        context.scale(-1, 1);
+      }
+
+      context.drawImage(
+        currentVideo,
+        (1080 - currentVideo.videoWidth * ratio) / 2,
+        (1350 - currentVideo.videoHeight * ratio) / 2,
+        currentVideo.videoWidth * ratio,
+        currentVideo.videoHeight * ratio
+      );
+
+      context.restore();
+
+      const photoBlob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (value) =>
+            value ? resolve(value) : reject(new Error("capture-failed")),
+          "image/jpeg",
+          0.94
+        );
+      });
+
+      stop();
+      Live(false);
+      Source(URL.createObjectURL(photoBlob));
+
+      setError(
+        "사진을 촬영했습니다. 정지된 사진에서 패랭이 위치와 크기를 조절해주세요."
+      );
+    } catch {
+      setError("사진 촬영에 실패했습니다. 카메라를 다시 켜주세요.");
+    } finally {
+      Busy(false);
+    }
+  }
+
+  async function capture() {
+    Busy(true);
+    setError("");
+
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1350;
+
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("canvas-not-supported");
+
+      const base = source ? await load(source) : video.current;
+      if (!base) throw new Error("photo-not-found");
+
+      const width = source
+        ? (base as HTMLImageElement).naturalWidth
+        : (base as HTMLVideoElement).videoWidth;
+
+      const height = source
+        ? (base as HTMLImageElement).naturalHeight
+        : (base as HTMLVideoElement).videoHeight;
+
+      if (!width || !height) throw new Error("invalid-photo");
+
+      const ratio = Math.max(1080 / width, 1350 / height);
+
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      context.save();
+
+      if (!source && facing === "user") {
+        context.translate(1080, 0);
+        context.scale(-1, 1);
+      }
+
+      context.drawImage(
+        base,
+        (1080 - width * ratio) / 2,
+        (1350 - height * ratio) / 2,
+        width * ratio,
+        height * ratio
+      );
+
+      context.restore();
+
+      const hat = await load("/images/golden-paeraengi-camellia.png");
+
+      context.save();
+      context.translate(x * 10.8, y * 13.5);
+      context.rotate((angle * Math.PI) / 180);
+
+      const hatWidth = scale * 10.8;
+      const hatHeight = (hatWidth * hat.height) / hat.width;
+
+      context.drawImage(
+        hat,
+        -hatWidth / 2,
+        -hatHeight / 2,
+        hatWidth,
+        hatHeight
+      );
+
+      context.restore();
+
+      context.fillStyle = "rgba(14,25,39,.85)";
+      context.fillRect(0, 1190, 1080, 160);
+
+      context.strokeStyle = "#efc769";
+      context.lineWidth = 8;
+      context.strokeRect(20, 20, 1040, 1310);
+
+      context.fillStyle = "#f5d58a";
+      context.textAlign = "center";
+      context.font = "bold 44px sans-serif";
+      context.fillText("수석 야행 보부상 임명", 540, 1253);
+
+      context.font = "30px sans-serif";
+      context.fillText("2026 보령 꿀잼야행 · 마켓런", 540, 1300);
+
+      const completedBlob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (value) =>
+            value ? resolve(value) : reject(new Error("merge-failed")),
+          "image/jpeg",
+          0.94
+        );
+      });
+
+      BlobState(completedBlob);
+      Result(URL.createObjectURL(completedBlob));
+
+      stop();
+      Live(false);
+      setError("");
+    } catch {
+      setError(
+        "사진 합성에 실패했습니다. 사진을 다시 촬영하거나 선택해주세요."
+      );
+    } finally {
+      Busy(false);
+    }
+  }
+
+  async function share() {
+    if (!blob) return;
+
+    const file = new File(
+      [blob],
+      "황금패랭이_인증사진.jpg",
+      { type: "image/jpeg" }
+    );
+
+    try {
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "수석 야행 보부상",
+        });
+
+        setError(
+          "공유 메뉴에서 ‘이미지 저장’을 선택하면 사진 앱에 저장됩니다."
+        );
+      } else {
+        window.open(result, "_blank");
+        setError("새로 열린 완성 사진을 길게 눌러 저장해주세요.");
+      }
+    } catch (shareError) {
+      if ((shareError as Error).name !== "AbortError") {
+        setError("사진만 크게 연 뒤 길게 눌러 저장해주세요.");
+      }
+    }
+  }
+
+  const hasBase = Boolean(source || live);
+
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) {
+          stop();
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="g-dialog g-camera">
+        <DialogTitle>황금 패랭이 인증사진</DialogTitle>
+
+        <DialogDescription>
+          셀카를 촬영한 뒤 정지된 사진에서 패랭이 위치를 조절하세요.
+          사진은 서버로 전송되지 않습니다.
+        </DialogDescription>
+
+        {!result && (
+          <div className="g-capture-options">
+            <button
+              type="button"
+              className="g-upload g-upload-primary"
+              disabled={busy}
+              onClick={() => start("user")}
+            >
+              <Camera size={20} />
+              {busy ? "카메라 연결 중…" : "셀카 카메라 켜기"}
+            </button>
+
+            <label className="g-upload">
+              사진 촬영·앨범에서 선택
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => choose(event.target.files?.[0])}
+              />
+            </label>
+          </div>
+        )}
+
+        <div className="g-camera-stage" ref={stage}>
+          <video
+            ref={video}
+            muted
+            playsInline
+            style={{
+              display: live && !result ? "block" : "none",
+              transform: facing === "user" ? "scaleX(-1)" : "none",
+            }}
+          />
+
+          {source && !result && (
+            <img
+              className="g-photo-base"
+              src={source}
+              alt="선택하거나 촬영한 사진"
+            />
+          )}
+
+          {result ? (
+            <img
+              className="g-photo-base"
+              src={result}
+              alt="완성한 인증사진"
+            />
+          ) : hasBase ? (
+            <>
+              <img
+                draggable={false}
+                className="g-photo-hat"
+                src="/images/golden-paeraengi-camellia.png"
+                alt="이동 가능한 황금 패랭이"
+                style={{
+                  left: `${x}%`,
+                  top: `${y}%`,
+                  width: `${scale}%`,
+                  transform: `translate(-50%,-50%) rotate(${angle}deg)`,
+                }}
+                onPointerDown={(event) => {
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                }}
+                onPointerMove={(event) => {
+                  if (
+                    event.currentTarget.hasPointerCapture(event.pointerId) &&
+                    stage.current
+                  ) {
+                    const rect = stage.current.getBoundingClientRect();
+
+                    X(
+                      Math.max(
+                        0,
+                        Math.min(
+                          100,
+                          ((event.clientX - rect.left) / rect.width) * 100
+                        )
+                      )
+                    );
+
+                    Y(
+                      Math.max(
+                        0,
+                        Math.min(
+                          100,
+                          ((event.clientY - rect.top) / rect.height) * 100
+                        )
+                      )
+                    );
+                  }
+                }}
+              />
+
+              <span className="g-photo-caption">
+                수석 야행 보부상 임명
+                <br />
+                <small>2026 보령 꿀잼야행 · 마켓런</small>
+              </span>
+            </>
+          ) : (
+            <div className="g-camera-placeholder">
+              <img
+                className="g-placeholder-hat"
+                src="/images/golden-paeraengi-camellia.png"
+                alt="황금 패랭이"
+              />
+
+              <Camera size={36} />
+              <strong>셀카 카메라를 켜주세요</strong>
+              <small>
+                촬영 후 정지된 사진에서 패랭이를 맞출 수 있습니다.
+              </small>
+            </div>
+          )}
+        </div>
+
+        <p className="g-camera-status" role="status">
+          {error}
+        </p>
+
+        {!result ? (
+          <>
+            <div className="g-camera-actions">
+              {live && (
+                <>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={freeze}
+                  >
+                    지금 모습 촬영하기
+                  </button>
+
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={busy}
+                    onClick={() =>
+                      start(facing === "user" ? "environment" : "user")
+                    }
+                  >
+                    전·후면 전환
+                  </button>
+                </>
+              )}
+
+              {source && !live && (
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={busy}
+                  onClick={() => start("user")}
+                >
+                  셀카 다시 촬영하기
+                </button>
+              )}
+            </div>
+
+            {source && !live && (
+              <div className="g-hat-controls">
+                <label>
+                  <span>
+                    패랭이 크기
+                    <strong>{scale}%</strong>
+                  </span>
+
+                  <input
+                    className="g-range"
+                    type="range"
+                    min="20"
+                    max="100"
+                    step="1"
+                    value={scale}
+                    onChange={(event) =>
+                      Scale(Number(event.target.value))
+                    }
+                  />
+                </label>
+
+                <label>
+                  <span>
+                    패랭이 기울기
+                    <strong>{angle}°</strong>
+                  </span>
+
+                  <input
+                    className="g-range"
+                    type="range"
+                    min="-45"
+                    max="45"
+                    step="1"
+                    value={angle}
+                    onChange={(event) =>
+                      Angle(Number(event.target.value))
+                    }
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => {
+                    X(50);
+                    Y(25);
+                    Scale(55);
+                    Angle(0);
+                  }}
+                >
+                  패랭이 위치 초기화
+                </button>
+              </div>
+            )}
+
+            {source && !live && (
+              <button disabled={busy} onClick={capture}>
+                {busy
+                  ? "사진 만드는 중…"
+                  : "패랭이 위치 확정 · 완성하기"}
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <button onClick={share}>
+              공유 메뉴로 사진 저장하기
+            </button>
+
+            <a
+              className="g-button secondary"
+              href={result}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              완성 사진만 크게 열기
+            </a>
+
+            <p className="g-small">
+              아이폰 공유 메뉴에서 ‘이미지 저장’을 선택하세요.
+              인앱 브라우저에서 저장이 안 되면 사진을 크게 연 뒤
+              길게 눌러 저장해주세요.
+            </p>
+
+            <button
+              className="secondary"
+              onClick={() => {
+                Result("");
+                BlobState(null);
+                setError("");
+              }}
+            >
+              다시 만들기
+            </button>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
  const video=useRef<HTMLVideoElement>(null);const stream=useRef<MediaStream|null>(null);const stage=useRef<HTMLDivElement>(null);const [source,Source]=useState('');const [live,Live]=useState(false);const [facing,Facing]=useState<'user'|'environment'>('user');const [busy,Busy]=useState(false);const [error,setError]=useState('');const [x,X]=useState(50);const [y,Y]=useState(24);const [scale,Scale]=useState(55);const [angle,Angle]=useState(0);const [result,Result]=useState('');const [blob,BlobState]=useState<Blob|null>(null);const active=useRef(true);
  const stop=()=>{stream.current?.getTracks().forEach(t=>t.stop());stream.current=null;};
  useEffect(()=>{active.current=true;return()=>{active.current=false;stop();};},[]);
  useEffect(()=>()=>{if(source)URL.revokeObjectURL(source);},[source]);useEffect(()=>()=>{if(result)URL.revokeObjectURL(result);},[result]);
- async function start(next=facing){Busy(true);setError('');stop();Live(false);try{const media=await navigator.mediaDevices.getUserMedia({video:{facingMode:next,width:{ideal:1080},height:{ideal:1350}},audio:false});if(!active.current){media.getTracks().forEach(t=>t.stop());return;}stream.current=media;Facing(next);Source('');Result('');if(video.current){video.current.srcObject=media;await video.current.play();}Live(true);}catch{stop();setError('카메라를 열 수 없습니다. 브라우저 카메라 권한을 확인하거나 사진을 선택해주세요.');}finally{Busy(false);}}
+ const choose=(file?:File)=>{if(!file)return;stop();Live(false);Source(URL.createObjectURL(file));Result('');BlobState(null);setError('사진을 불러왔습니다. 패랭이 위치를 맞춰주세요.');};
+ async function start(next=facing){Busy(true);setError('');stop();Live(false);try{if(!navigator.mediaDevices?.getUserMedia)throw Error();const media=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:next},width:{ideal:1080},height:{ideal:1350}},audio:false});if(!active.current){media.getTracks().forEach(t=>t.stop());return;}stream.current=media;Facing(next);Source('');Result('');if(video.current){video.current.srcObject=media;video.current.setAttribute('playsinline','true');await video.current.play();}Live(true);}catch{stop();setError('실시간 카메라를 열 수 없습니다. 위의 “휴대폰 카메라로 촬영”을 이용해주세요.');}finally{Busy(false);}}
  async function load(src:string){const im=new Image();im.src=src;await im.decode();return im;}
- async function capture(){Busy(true);setError('');try{const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const ctx=canvas.getContext('2d')!;const base=source?await load(source):video.current!;const w=source?(base as HTMLImageElement).naturalWidth:video.current!.videoWidth;const h=source?(base as HTMLImageElement).naturalHeight:video.current!.videoHeight;if(!w||!h)throw Error();const ratio=Math.max(1080/w,1350/h);ctx.save();if(!source&&facing==='user'){ctx.translate(1080,0);ctx.scale(-1,1);}ctx.drawImage(base,(1080-w*ratio)/2,(1350-h*ratio)/2,w*ratio,h*ratio);ctx.restore();const hat=await load('/images/golden-paeraengi-camellia.png');ctx.save();ctx.translate(x*10.8,y*13.5);ctx.rotate(angle*Math.PI/180);const width=scale*10.8;ctx.drawImage(hat,-width/2,-width*hat.height/hat.width/2,width,width*hat.height/hat.width);ctx.restore();ctx.fillStyle='rgba(14,25,39,.85)';ctx.fillRect(0,1190,1080,160);ctx.strokeStyle='#efc769';ctx.lineWidth=8;ctx.strokeRect(20,20,1040,1310);ctx.fillStyle='#f5d58a';ctx.textAlign='center';ctx.font='bold 44px sans-serif';ctx.fillText('수석 야행 보부상 임명',540,1253);ctx.font='30px sans-serif';ctx.fillText('2026 보령 꿀잼야행 · 마켓런',540,1300);ctx.save();ctx.translate(910,170);ctx.rotate(-.14);ctx.strokeRect(-95,-70,190,140);ctx.font='bold 32px sans-serif';ctx.fillText('황금 인증',0,12);ctx.restore();const b=await new Promise<Blob>((res,rej)=>canvas.toBlob(b=>b?res(b):rej(Error()),'image/png'));BlobState(b);Result(URL.createObjectURL(b));stop();Live(false);}catch{setError('사진 합성에 실패했습니다. 사진이나 카메라를 다시 선택해주세요.');}finally{Busy(false);}}
- async function share(){if(!blob)return;const file=new File([blob],'황금패랭이_인증사진.png',{type:'image/png'});try{if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file],title:'수석 야행 보부상'});else setError('공유를 지원하지 않는 브라우저입니다. 사진 저장 버튼을 이용해주세요.');}catch(e){if((e as Error).name!=='AbortError')setError('공유하지 못했습니다. 사진 저장 버튼을 이용해주세요.');}}
- return <Dialog open onOpenChange={open=>{if(!open){stop();onClose();}}}><DialogContent className="g-dialog g-camera"><DialogTitle>황금 패랭이 인증사진</DialogTitle><DialogDescription>패랭이를 손가락으로 옮겨 머리 위에 맞추세요. 사진은 서버로 전송되지 않습니다.</DialogDescription><div className="g-camera-stage" ref={stage}><video ref={video} muted playsInline style={{display:live&&!result?'block':'none',transform:facing==='user'?'scaleX(-1)':'none'}}/>{source&&!result&&<img className="g-photo-base" src={source} alt="선택한 사진"/>}{result?<img className="g-photo-base" src={result} alt="완성한 인증사진"/>:<><img draggable={false} className="g-photo-hat" src="/images/golden-paeraengi-camellia.png" alt="보령시 시화 동백꽃으로 장식한 이동 가능한 황금 패랭이" style={{left:x+'%',top:y+'%',width:scale+'%',transform:`translate(-50%,-50%) rotate(${angle}deg)`}} onPointerDown={e=>e.currentTarget.setPointerCapture(e.pointerId)} onPointerMove={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId)&&stage.current){const r=stage.current.getBoundingClientRect();X(Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)));Y(Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100)));}}}/><span className="g-photo-caption">수석 야행 보부상 임명<br/><small>2026 보령 꿀잼야행 · 마켓런</small></span></>}</div><p role="status">{error}</p>{!result?<><div className="g-camera-actions"><button disabled={busy} onClick={()=>start()}>카메라 켜기</button><button disabled={busy||!live} onClick={()=>start(facing==='user'?'environment':'user')}>카메라 전환</button></div><label className="g-upload">사진 선택 · 촬영<input type="file" accept="image/*" onChange={e=>{const file=e.target.files?.[0];if(file){stop();Live(false);Source(URL.createObjectURL(file));Result('');setError('');}}}/></label><label>패랭이 크기<Slider value={[scale]} min={20} max={100} onValueChange={v=>Scale((v as number[])[0])} aria-label="패랭이 크기"/></label><label>패랭이 기울기<Slider value={[angle]} min={-45} max={45} onValueChange={v=>Angle((v as number[])[0])} aria-label="패랭이 기울기"/></label><button disabled={busy||(!source&&!live)} onClick={capture}>{busy?'준비 중…':'인증사진 완성하기'}</button></>:<><a className="g-button" href={result} download="황금패랭이_인증사진.png">사진 저장하기</a><button onClick={share}>사진 공유하기</button><p className="g-small">아이폰에서 저장되지 않으면 사진을 길게 눌러 저장하세요.</p><button className="secondary" onClick={()=>{Result('');BlobState(null);}}>다시 만들기</button></>}</DialogContent></Dialog>;
-}
+ async function capture(){Busy(true);setError('');try{const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;const ctx=canvas.getContext('2d');if(!ctx)throw Error();const base=source?await load(source):video.current;if(!base)throw Error();const w=source?(base as HTMLImageElement).naturalWidth:(base as HTMLVideoElement).videoWidth;const h=source?(base as HTMLImageElement).naturalHeight:(base as HTMLVideoElement).videoHeight;if(!w||!h)throw Error();const ratio=Math.max(1080/w,1350/h);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.save();if(!source&&facing==='user'){ctx.translate(1080,0);ctx.scale(-1,1);}ctx.drawImage(base,(1080-w*ratio)/2,(1350-h*ratio)/2,w*ratio,h*ratio);ctx.restore();const hat=await load('/images/golden-paeraengi-camellia.png');ctx.save();ctx.translate(x*10.8,y*13.5);ctx.rotate(angle*Math.PI/180);const width=scale*10.8;ctx.drawImage(hat,-width/2,-width*hat.height/hat.width/2,width,width*hat.height/hat.width);ctx.restore();ctx.fillStyle='rgba(14,25,39,.85)';ctx.fillRect(0,1190,1080,160);ctx.strokeStyle='#efc769';ctx.lineWidth=8;ctx.strokeRect(20,20,1040,1310);ctx.fillStyle='#f5d58a';ctx.textAlign='center';ctx.font='bold 44px sans-serif';ctx.fillText('수석 야행 보부상 임명',540,1253);ctx.font='30px sans-serif';ctx.fillText('2026 보령 꿀잼야행 · 마켓런',540,1300);const b=await new Promise<Blob>((res,rej)=>canvas.toBlob(value=>value?res(value):rej(Error()),'image/jpeg',.94));BlobState(b);Result(URL.createObjectURL(b));stop();Live(false);}catch{setError('사진 합성에 실패했습니다. 사진을 다시 촬영하거나 선택해주세요.');}finally{Busy(false);}}
+ async function share(){if(!blob)return;const file=new File([blob],'황금패랭이_인증사진.jpg',{type:'image/jpeg'});try{if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file],title:'수석 야행 보부상'});else{const a=document.createElement('a');a.href=result;a.download=file.name;a.click();setError('저장이 시작되지 않으면 완성 사진을 길게 눌러 저장해주세요.');}}catch(e){if((e as Error).name!=='AbortError')setError('완성 사진을 길게 눌러 저장해주세요.');}}
+ const hasBase=Boolean(source||live);
+      </DialogContent>
+    </Dialog>
+  );
+} 

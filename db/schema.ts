@@ -14,5 +14,8 @@ export const adminSettings = sqliteTable("admin_settings", {
   surveyUrl: text("survey_url").notNull().default(""),
   point3Answers: text("point3_answers").notNull().default("[]"),
   benefits: text("benefits").notNull().default("[]"),
+  mission1Answers: text("mission1_answers").notNull().default('["패","랭","이"]'),
+  mission2Code: text("mission2_code").notNull().default("251"),
+  mission3Answers: text("mission3_answers").notNull().default('["황금송","황금소나무","소나무"]'),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });

@@ -19,16 +19,19 @@ function parseList<T>(value: string | null, fallback: T[]): T[] {
 
 export async function GET() {
   try {
-    const row = await getD1().prepare("SELECT survey_url, point3_answers, benefits FROM admin_settings WHERE id = 1").first<{
+    const row = await getD1().prepare("SELECT survey_url, mission1_answers, mission2_code, mission3_answers FROM admin_settings WHERE id = 1").first<{
       survey_url: string;
-      point3_answers: string;
-      benefits: string;
+      mission1_answers: string;
+      mission2_code: string;
+      mission3_answers: string;
     }>();
 
     return Response.json({
       surveyUrl: row?.survey_url?.trim() || "https://naver.me/5T0ElUPI",
-      point3Answers: parseList<string>(row?.point3_answers ?? null, ["보령공방"]),
-      benefits: parseList<{ shop: string; benefit: string }>(row?.benefits ?? null, defaultBenefits),
+      mission1Answers: parseList<string>(row?.mission1_answers ?? null, ["패", "랭", "이"]),
+      mission2Code: row?.mission2_code?.trim() || "251",
+      mission3Answers: parseList<string>(row?.mission3_answers ?? null, ["황금송", "황금소나무", "소나무"]),
+      benefits: [],
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "운영 설정을 불러오지 못했습니다.";

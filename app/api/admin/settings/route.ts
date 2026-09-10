@@ -1,14 +1,6 @@
 import { env } from "cloudflare:workers";
 import { getD1 } from "../../../../db";
 
-type Benefit = { shop: string; benefit: string };
-const defaultBenefits: Benefit[] = [
-  { shop: "수산·건어물 제휴점", benefit: "2만원 이상 구매 시 3,000원 할인" },
-  { shop: "먹거리 제휴점", benefit: "1만원 이상 구매 시 1,000원 할인" },
-  { shop: "로컬푸드·청과 제휴점", benefit: "구매금액 10% 할인" },
-  { shop: "프리마켓 참여점포", benefit: "1만원 이상 구매 시 사은품 증정" },
-];
-
 function authorized(request: Request) {
   const configured = (env as unknown as { ADMIN_PASSWORD?: string }).ADMIN_PASSWORD;
   const supplied = request.headers.get("x-admin-password");
@@ -31,16 +23,18 @@ function parseList<T>(value: string | null, fallback: T[]): T[] {
 
 export async function GET(request: Request) {
   if (!authorized(request)) return unauthorized();
-  const row = await getD1().prepare("SELECT survey_url, point3_answers, benefits FROM admin_settings WHERE id = 1").first<{
+  const row = await getD1().prepare("SELECT survey_url, mission1_answers, mission2_code, mission3_answers FROM admin_settings WHERE id = 1").first<{
     survey_url: string;
-    point3_answers: string;
-    benefits: string;
+    mission1_answers: string;
+    mission2_code: string;
+    mission3_answers: string;
   }>();
 
   return Response.json({
     surveyUrl: row?.survey_url ?? "",
-    point3Answers: parseList<string>(row?.point3_answers ?? null, ["보령공방"]),
-    benefits: parseList<Benefit>(row?.benefits ?? null, defaultBenefits),
+    mission1Answers: parseList<string>(row?.mission1_answers ?? null, ["패", "랭", "이"]),
+    mission2Code: row?.mission2_code ?? "251",
+    mission3Answers: parseList<string>(row?.mission3_answers ?? null, ["황금송", "황금소나무", "소나무"]),
   });
 }
 
@@ -50,8 +44,9 @@ export async function PUT(request: Request) {
   try {
     const payload = await request.json() as {
       surveyUrl?: string;
-      point3Answers?: string[];
-      benefits?: Benefit[];
+      mission1Answers?: string[];
+      mission2Code?: string;
+      mission3Answers?: string[];
     };
     const surveyUrl = String(payload.surveyUrl ?? "").trim();
     if (surveyUrl) {
@@ -59,24 +54,29 @@ export async function PUT(request: Request) {
       if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error("유효한 네이버폼 URL을 입력해주세요.");
     }
 
-    const point3Answers = (payload.point3Answers ?? [])
-      .map((value) => String(value).trim().slice(0, 80))
+    const mission1Answers = (payload.mission1Answers ?? [])
+      .map((value) => String(value).trim().slice(0, 2))
       .filter(Boolean)
-      .slice(0, 30);
-    const benefits = (payload.benefits ?? [])
-      .map((item) => ({ shop: String(item.shop ?? "").trim().slice(0, 80), benefit: String(item.benefit ?? "").trim().slice(0, 160) }))
-      .filter((item) => item.shop && item.benefit)
-      .slice(0, 30);
+      .slice(0, 3);
+    if (mission1Answers.length !== 3) throw new Error("미션 1 정답 세 글자를 모두 입력해주세요.");
+    const mission2Code = String(payload.mission2Code ?? "").replace(/\D/g, "").slice(0, 3);
+    if (mission2Code.length !== 3) throw new Error("미션 2 암호는 숫자 세 자리로 입력해주세요.");
+    const mission3Answers = (payload.mission3Answers ?? [])
+      .map((value) => String(value).trim().slice(0, 20))
+      .filter(Boolean)
+      .slice(0, 10);
+    if (!mission3Answers.length) throw new Error("미션 3 인정 정답을 한 개 이상 입력해주세요.");
 
     await getD1().prepare(`
-      INSERT INTO admin_settings (id, survey_url, point3_answers, benefits, updated_at)
-      VALUES (1, ?, ?, ?, CURRENT_TIMESTAMP)
+      INSERT INTO admin_settings (id, survey_url, mission1_answers, mission2_code, mission3_answers, updated_at)
+      VALUES (1, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(id) DO UPDATE SET
         survey_url = excluded.survey_url,
-        point3_answers = excluded.point3_answers,
-        benefits = excluded.benefits,
+        mission1_answers = excluded.mission1_answers,
+        mission2_code = excluded.mission2_code,
+        mission3_answers = excluded.mission3_answers,
         updated_at = CURRENT_TIMESTAMP
-    `).bind(surveyUrl, JSON.stringify(point3Answers), JSON.stringify(benefits)).run();
+    `).bind(surveyUrl, JSON.stringify(mission1Answers), mission2Code, JSON.stringify(mission3Answers)).run();
 
     return Response.json({ ok: true });
   } catch (error) {

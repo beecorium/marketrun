@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "market-run-boryeong",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-09-09",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "boryeong-market-run-db",
+      "database_id": "9fd9e8b6-046b-4944-83af-4ebe47c3eaf0"
+    }
+  ]
+}

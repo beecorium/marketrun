@@ -187,6 +187,10 @@ button:disabled { cursor: default; }
 .admin-message.error { background: #fbe5df; color: #b42e28; }
 .admin-message.success { background: #e5f3ed; color: #155f53; display: flex; align-items: center; gap: 5px; }
 .admin-save { margin-top: 4px; min-height: 58px; }
+.admin-help { margin: 7px 0 0; color: #806f63; font-size: 12px; line-height: 1.55; }
+.admin-code-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.admin-code-grid input { text-align: center; font-size: 24px; font-weight: 900; }
+@media (max-width: 420px) { .admin-code-grid { gap: 6px; } .admin-panel { padding: 16px; } }
 
 .site-footer { position: relative; z-index: 2; width: 100%; margin: 27px auto 0; padding: 14px 4px 4px; border-top: 1px solid rgba(91,68,51,.16); text-align: center; color: #806f63; }
 .site-footer p { margin: 0; font-size: 10px; line-height: 1.5; letter-spacing: .01em; }
