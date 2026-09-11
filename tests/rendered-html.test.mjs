@@ -1,33 +1,37 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { unstable_dev } from "wrangler";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
+const rootTitle = /<title>마켓런-보령편 \| 왕을 구한 보부상<\/title>/i;
+const rootDescription =
+  /<meta(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["']QR을 따라 보령 전통시장을 누비며 쌍목화솜을 완성하는 30분 모바일 미션투어["'])[^>]*>/i;
 
-test("renders development preview metadata", async () => {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+test("renders the built root page metadata in the Workers runtime", async () => {
+  // The built worker imports the `cloudflare:workers` runtime module, which
+  // Node's ESM loader cannot resolve. Exercise it in the local Workers runtime.
+  const worker = await unstable_dev("./dist/server/index.js", {
+    config: "./dist/server/wrangler.json",
+    bundle: false,
+    local: true,
+    compatibilityDate: "2026-05-22",
+    logLevel: "none",
+    experimental: { disableDevRegistry: true },
+  });
 
-  const response = await worker.fetch(
-    new Request("http://localhost/", {
+  try {
+    const response = await worker.fetch("http://localhost/", {
       headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+    });
 
-  assert.equal(response.status, 200);
-  assert.match(
-    response.headers.get("content-type") ?? "",
-    /^text\/html\b/i,
-  );
-  assert.match(await response.text(), developmentPreviewMeta);
+    assert.equal(response.status, 200);
+    assert.match(
+      response.headers.get("content-type") ?? "",
+      /^text\/html\b/i,
+    );
+    const html = await response.text();
+    assert.match(html, rootTitle);
+    assert.match(html, rootDescription);
+  } finally {
+    await worker.stop();
+  }
 });

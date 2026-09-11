@@ -28,314 +28,134 @@
 .g-reward-proof time { display: inline-block; margin: 8px 0; padding: 7px 12px; border-radius: 8px; background: #ffffff0b; color: #d9e0e8; font-size: 13px; }
 .g-proof-warning { color: #ffdc93 !important; font-weight: 750; }
 
-/* Mobile-first certificate camera: native capture is the reliable primary path. */
-.g-camera-actions { display: flex; gap: 8px; position: static !important; }
-.g-camera-actions button { flex: 1; position: static !important; }
-.g-capture-options { display: grid; gap: 8px; }
-.g-upload { position: relative; display: flex !important; align-items: center; justify-content: center; gap: 8px; text-align: center; cursor: pointer; }
-.g-upload-primary { min-height: 52px; background: #f2cb76; color: #192436; border-color: #f2cb76; font-weight: 800; }
-.g-upload input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
-.g-camera-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 30px; text-align: center; color: #e8cb8d; background: linear-gradient(145deg,#111d2d,#0a1423); }
-.g-camera-placeholder small { color: #aeb9c7; font-size: 13px; }
-.g-camera-status { min-height: 24px; margin: 4px 0 !important; color: #f8d285 !important; font-size: 13px; }
-.g-live-camera { border: 1px solid #526276; border-radius: 12px; padding: 10px 12px; }
-.g-live-camera summary { cursor: pointer; color: #d6dee8; font-size: 14px; }
-.g-live-camera .g-camera-actions { margin-top: 10px; }
-@media(max-width:600px){
-  .g-dialog.g-camera { inset: 0 !important; translate: none !important; transform: none !important; width: 100% !important; max-width: none !important; height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; padding: 18px 14px 26px !important; overflow-y: auto !important; }
-  .g-camera-stage { width: 100%; min-height: 0; }
-  .g-dialog.g-camera>[data-slot=dialog-close] { position: fixed; top: 12px; right: 12px; z-index: 20; }
-  .g-camera-actions { flex-direction: column; }
+/* Certificate camera: one layout for the preview, live feed and finished photo. */
+.g-dialog.g-camera {
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(560px, calc(100% - 24px)) !important;
+  max-width: 560px !important;
+  max-height: 94dvh;
+  padding: 0 18px 20px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: none;
 }
-/* 모바일 인증사진 팝업 전체화면 보정 */
-@media screen and (max-width: 1000px) {
-  .g-dialog.g-camera {
-    position: fixed !important;
-    inset: 0 !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-
-    width: 100vw !important;
-    min-width: 100vw !important;
-    max-width: 100vw !important;
-
-    height: 100dvh !important;
-    min-height: 100dvh !important;
-    max-height: 100dvh !important;
-
-    margin: 0 !important;
-    padding: calc(16px + env(safe-area-inset-top))
-      14px
-      calc(24px + env(safe-area-inset-bottom)) !important;
-
-    translate: none !important;
-    transform: none !important;
-    box-sizing: border-box !important;
-    border-radius: 0 !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  .g-dialog.g-camera > * {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .g-dialog.g-camera .g-camera-stage {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 4 / 5 !important;
-    overflow: hidden !important;
-  }
-
-  .g-dialog.g-camera video,
-  .g-dialog.g-camera canvas,
-  .g-dialog.g-camera img {
-    max-width: 100% !important;
-  }
-}
-/* 인증사진 팝업 강제 전체화면 — 반드시 파일 마지막에 배치 */
-html body [data-slot="dialog-content"].g-dialog.g-camera {
-  position: fixed !important;
-  inset: auto !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: auto !important;
-  bottom: auto !important;
-
-  width: 100dvw !important;
-  min-width: 100dvw !important;
-  max-width: 100dvw !important;
-
-  height: 100dvh !important;
-  min-height: 100dvh !important;
-  max-height: 100dvh !important;
-
-  margin: 0 !important;
-  padding: calc(18px + env(safe-area-inset-top))
-    14px
-    calc(24px + env(safe-area-inset-bottom)) !important;
-
-  translate: none !important;
-  transform: none !important;
-
-  box-sizing: border-box !important;
-  border-radius: 0 !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  z-index: 9999 !important;
-}
-
-html body [data-slot="dialog-content"].g-dialog.g-camera > * {
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-html body [data-slot="dialog-content"].g-dialog.g-camera .g-camera-stage {
-  position: relative !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  height: auto !important;
-  min-height: 0 !important;
-  aspect-ratio: 4 / 5 !important;
-  flex-shrink: 0 !important;
-  overflow: hidden !important;
-}
-
-html body [data-slot="dialog-content"].g-dialog.g-camera
-  [data-slot="dialog-close"] {
-  position: fixed !important;
-  top: calc(12px + env(safe-area-inset-top)) !important;
-  right: 12px !important;
-  left: auto !important;
-  z-index: 10001 !important;
-}
-/* Dialog 열림 애니메이션으로 인한 왼쪽 50% 밀림 제거 */
-html body [data-slot="dialog-content"].g-camera,
-html body [data-slot="dialog-content"].g-camera[data-state="open"],
-html body [data-slot="dialog-content"].g-camera[data-state="closed"] {
-  animation: none !important;
-
-  position: fixed !important;
-  inset: 0 auto auto 0 !important;
-
-  top: 0 !important;
-  left: 0 !important;
-  right: auto !important;
-  bottom: auto !important;
-
-  width: 100dvw !important;
-  min-width: 100dvw !important;
-  max-width: 100dvw !important;
-
-  height: 100dvh !important;
-  min-height: 100dvh !important;
-  max-height: 100dvh !important;
-
-  translate: 0 0 !important;
-  transform: none !important;
-
-  --tw-translate-x: 0px !important;
-  --tw-translate-y: 0px !important;
-  --tw-scale-x: 1 !important;
-  --tw-scale-y: 1 !important;
-
-  margin: 0 !important;
-  box-sizing: border-box !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-.g-placeholder-hat {
-  position: relative !important;
-  width: min(72%, 320px) !important;
-  height: auto !important;
-  max-height: 42% !important;
-  object-fit: contain !important;
-  margin-bottom: 14px !important;
-  opacity: 0.9;
-}
-
-.g-hat-controls {
-  display: grid;
-  gap: 18px;
-  width: 100%;
-  padding: 16px;
-  border: 1px solid #566274;
-  border-radius: 14px;
-  background: #111d2d;
-  box-sizing: border-box;
-}
-
-.g-hat-controls label {
-  display: grid !important;
-  gap: 10px;
-  width: 100% !important;
-}
-
-.g-hat-controls label span {
+.g-camera > * { min-width: 0; flex-shrink: 0; }
+.g-camera .g-camera-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #f5d58a;
-  font-size: 15px;
+  gap: 12px;
+  padding: 14px 0 8px;
+  background: #172538;
 }
-
-.g-hat-controls label strong {
-  color: #ffffff;
-}
-
-.g-range {
-  display: block;
-  width: 100%;
-  height: 34px;
-  margin: 0;
+.g-camera-header [data-slot=dialog-title] { line-height: 1.4; }
+.g-camera .g-camera-header [data-slot=dialog-close] {
+  position: static;
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  margin-left: auto;
   padding: 0;
-  accent-color: #efc769;
-  appearance: auto;
-  -webkit-appearance: auto;
+  border-radius: 50%;
+  background: #ffffff12;
+  color: #fff5de;
 }
-
-.g-camera-stage video {
-  display: block;
+.g-camera .g-upload {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  text-align: center;
+  cursor: pointer;
+}
+.g-camera .g-upload input[type=file] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+.g-camera .g-upload:focus-within { outline: 2px solid #f5d58a; outline-offset: 3px; }
+.g-camera .g-upload:has(input:disabled) { opacity: .45; cursor: default; }
+.g-camera .g-camera-stage {
+  position: relative;
+  isolation: isolate;
+  align-self: center;
+  width: min(100%, 420px, 48dvh);
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4 / 5;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #0a1423;
+}
+.g-camera-stage .g-photo-base {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #050a12;
 }
-/* 인증사진 모바일 최종 보정 */
-
-.g-camera-stage {
-  position: relative !important;
-  width: 100% !important;
-  height: min(56dvh, 560px) !important;
-  min-height: 420px !important;
-  aspect-ratio: auto !important;
-  overflow: hidden !important;
-}
-
-.g-camera-stage video,
-.g-camera-stage .g-photo-base {
-  position: absolute !important;
-  inset: 0 !important;
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-}
-
-.g-photo-hat {
-  position: absolute !important;
-  height: auto !important;
-  z-index: 3 !important;
+.g-camera .g-photo-hat {
+  position: absolute;
+  height: auto;
+  max-width: none;
+  z-index: 2;
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
-
-.g-placeholder-hat {
-  position: relative !important;
-  width: min(72%, 320px) !important;
-  height: auto !important;
-  max-height: 42% !important;
-  object-fit: contain !important;
-  margin-bottom: 12px !important;
-  opacity: 0.9;
-}
-
-.g-hat-controls {
-  display: grid !important;
-  gap: 16px !important;
-  width: 100% !important;
-  margin: 12px 0 !important;
-  padding: 16px !important;
-  border: 1px solid #566274 !important;
-  border-radius: 14px !important;
-  background: #111d2d !important;
-  box-sizing: border-box !important;
-}
-
-.g-hat-controls label {
-  display: grid !important;
-  gap: 8px !important;
-  width: 100% !important;
-}
-
-.g-hat-controls label span {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  color: #f5d58a !important;
-}
-
-.g-hat-controls label strong {
-  color: #ffffff !important;
-}
-
-.g-range {
-  display: block !important;
-  width: 100% !important;
-  height: 32px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
-}
-
-.g-range::-webkit-slider-runnable-track {
+.g-camera .g-photo-hat:active { cursor: grabbing; }
+.g-camera .g-camera-survey-note { margin: 0; color: #f4dcaa; font-size: 14px; text-align: center; }
+.g-camera .g-camera-status { margin: 0; color: #f8d285; font-size: 13px; }
+.g-camera .g-camera-status:empty,
+.g-camera .g-camera-actions:empty { display: none; }
+.g-camera .g-camera-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.g-camera-actions button { flex: 1 1 140px; }
+.g-camera .g-hat-controls {
+  position: static;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
   width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: #657285;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #566274;
+  border-radius: 14px;
+  background: #111d2d;
 }
-
+.g-camera .g-hat-controls label { display: grid; gap: 2px; width: 100%; margin: 0; }
+.g-hat-controls label span { display: flex; justify-content: space-between; color: #f5d58a; font-size: 15px; }
+.g-hat-controls label strong { color: #fff; }
+.g-camera .g-range {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: pan-y;
+}
+.g-range::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: #657285; }
 .g-range::-webkit-slider-thumb {
   width: 28px;
   height: 28px;
@@ -343,50 +163,23 @@ html body [data-slot="dialog-content"].g-camera[data-state="closed"] {
   border: 3px solid #fff4d3;
   border-radius: 50%;
   background: #efc769;
-  box-shadow: 0 2px 8px #0008;
   appearance: none;
   -webkit-appearance: none;
 }
-
-.g-camera-actions {
-  display: flex !important;
-  gap: 8px !important;
-  width: 100% !important;
-  padding: 8px 0 !important;
-}
-
-.g-camera-actions button {
-  flex: 1;
-}
-
-/* 우측 상단 작은 닫기 버튼 */
-html body [data-slot="dialog-content"].g-camera
-  [data-slot="dialog-close"] {
-  position: fixed !important;
-  top: calc(10px + env(safe-area-inset-top)) !important;
-  right: 10px !important;
-  left: auto !important;
-  bottom: auto !important;
-
-  width: 36px !important;
-  min-width: 36px !important;
-  max-width: 36px !important;
-
-  height: 36px !important;
-  min-height: 36px !important;
-  max-height: 36px !important;
-
-  padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 50% !important;
-
-  display: grid !important;
-  place-items: center !important;
-  z-index: 10002 !important;
-}
-
-html body [data-slot="dialog-content"].g-camera
-  [data-slot="dialog-close"] svg {
-  width: 18px !important;
-  height: 18px !important;
+.g-range::-moz-range-track { height: 8px; border-radius: 999px; background: #657285; }
+.g-range::-moz-range-thumb { width: 22px; height: 22px; border: 3px solid #fff4d3; border-radius: 50%; background: #efc769; }
+.g-range:focus-visible { outline: 2px solid #f5d58a; outline-offset: 2px; border-radius: 4px; }
+.g-range:disabled { opacity: .45; }
+@media (max-width: 600px) {
+  .g-dialog.g-camera {
+    inset: 0;
+    transform: none;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 0 max(14px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)) !important;
+    border-radius: 0;
+  }
+  .g-camera .g-camera-header { padding-top: calc(10px + env(safe-area-inset-top)); }
 }
