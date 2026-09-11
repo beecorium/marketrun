@@ -1,9 +1,11 @@
 .g-tastes { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 22px 0; }
-.g-tastes span { min-height: 86px; padding: 10px 5px; border: 1px dashed #657285; border-radius: 13px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #9ca8b7; }
-.g-tastes span.found { border-style: solid; border-color: #efc76f; background: #f4ca7013; color: #f7d894; }
+.g-tastes > span { min-height: 86px; padding: 10px 5px; border: 1px dashed #657285; border-radius: 13px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #9ca8b7; }
+.g-tastes > span.found { border-style: solid; border-color: #efc76f; background: #f4ca7013; color: #f7d894; }
 .g-tastes b, .g-tastes small { display: block; }
 .g-tastes b { font-size: 28px; line-height: 1.15; letter-spacing: -.08em; }
 .g-tastes small { font-size: 11px; }
+.g-taste-icon, .g-taste-name { display: block; }
+.g-taste-icon { margin-bottom: 2px; }
 .g-seal { min-height: 150px !important; flex-direction: column; background: transparent !important; border: 0 !important; color: #f4d58d !important; }
 .g-seal-face { width: 106px; height: 106px; border-radius: 50%; border: 5px double #e4b95d; background: radial-gradient(circle,#8d271d,#5c1714); box-shadow: inset 0 0 0 6px #7b2119,0 8px 22px #0007; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-7deg); }
 .g-seal-face b { font-family: serif; font-size: 19px; line-height: 1; }
@@ -184,3 +186,5 @@
   }
   .g-camera .g-camera-header { padding-top: calc(10px + env(safe-area-inset-top)); }
 }
+
+.g-finish > .g-eyebrow { font-size: 18.2px; }
