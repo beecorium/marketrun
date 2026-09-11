@@ -4,6 +4,15 @@
   "main": "./worker/index.ts",
   "compatibility_date": "2026-09-09",
   "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": true,
+
+  "routes": [
+    {
+      "pattern": "market-run.co.kr",
+      "custom_domain": true
+    }
+  ],
 
   "d1_databases": [
     {
