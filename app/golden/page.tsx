@@ -67,12 +67,13 @@ function Photo({ onClose }: { onClose: () => void }) {
     let resultUrl = '';
     const timer = window.setTimeout(async () => {
       try {
-        const load = async (src: string) => {
+        const load = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
           const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error('image-load-failed'));
           image.src = src;
-          await image.decode();
-          return image;
-        };
+          if (image.complete && image.naturalWidth) resolve(image);
+        });
         const [base, hat] = await Promise.all([
           load(source), load(hatImage),
         ]);
@@ -149,7 +150,7 @@ function Photo({ onClose }: { onClose: () => void }) {
         <DialogDescription>사진을 선택한 뒤 패랭이를 끌어 위치를 맞추세요.</DialogDescription>
         <label className="g-upload">
           <Camera size={20}/> 사진 촬영·앨범에서 선택
-          <input type="file" accept="image/*" disabled={sharing} onChange={event => {
+          <input type="file" accept="image/*" capture="environment" disabled={sharing} onChange={event => {
             const file = event.target.files?.[0];
             if (file) {
               Source(URL.createObjectURL(file));
