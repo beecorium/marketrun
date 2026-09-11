@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { unstable_dev } from "wrangler";
 
-const rootTitle = /<title>마켓런-보령편 \| 왕을 구한 보부상<\/title>/i;
-const rootDescription =
-  /<meta(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["']QR을 따라 보령 전통시장을 누비며 쌍목화솜을 완성하는 30분 모바일 미션투어["'])[^>]*>/i;
+const goldenTitle = /<title>황금 패랭이를 찾아라 \| 보령 꿀잼야행<\/title>/i;
+const goldenDescription =
+  /<meta(?=[^>]*\bname=["']description["'])(?=[^>]*\bcontent=["']밤길에 숨은 세 개의 징표를 찾아 황금 패랭이를 완성하는 보령 전통시장 모바일 미션["'])[^>]*>/i;
 
-test("renders the built root page metadata in the Workers runtime", async () => {
+test("renders the built golden page metadata in the Workers runtime", async () => {
   // The built worker imports the `cloudflare:workers` runtime module, which
   // Node's ESM loader cannot resolve. Exercise it in the local Workers runtime.
   const worker = await unstable_dev("./dist/server/index.js", {
@@ -19,7 +19,7 @@ test("renders the built root page metadata in the Workers runtime", async () => 
   });
 
   try {
-    const response = await worker.fetch("http://localhost/", {
+    const response = await fetch(`http://${worker.address}:${worker.port}/golden`, {
       headers: { accept: "text/html" },
     });
 
@@ -29,8 +29,8 @@ test("renders the built root page metadata in the Workers runtime", async () => 
       /^text\/html\b/i,
     );
     const html = await response.text();
-    assert.match(html, rootTitle);
-    assert.match(html, rootDescription);
+    assert.match(html, goldenTitle);
+    assert.match(html, goldenDescription);
   } finally {
     await worker.stop();
   }
