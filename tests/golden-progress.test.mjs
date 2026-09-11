@@ -4,7 +4,7 @@ import { advance, allowed, fresh, key, normalize } from '../app/golden/progress.
 
 test('lanterns accept only the current clue and preserve saved progress', () => {
   let state = fresh();
-  assert.equal(key, 'boryeong-golden-2026-v4');
+  assert.equal(key, 'boryeong-golden-2026-v3');
   for (const [index, clue] of ['만', '세', '보령'].entries()) {
     for (const wrong of ['패', '랭', '이', '패랭이', '만세보령', ...['만', '세', '보령'].filter(v => v !== clue)]) {
       assert.equal(advance(1, wrong, state), null);
