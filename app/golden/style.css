@@ -43,3 +43,7 @@
   .g-map-scroll { max-height:48svh; }
 }
 @media(prefers-reduced-motion:reduce) { .g-map-scroll { scroll-behavior:auto; } }
+
+/* Mission header hierarchy: the journey title leads, the clue line supports it. */
+.g-heading .g-eyebrow { font-size: clamp(14px, 4.1vw, 18px); }
+.g-heading h1 { font-size: clamp(19px, 5.6vw, 25px); }

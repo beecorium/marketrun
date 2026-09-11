@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-const title = '황금 패랭이를 찾아라 | 2026 보령 꿀잼야행';
+const title = '황금 패랭이를 찾아라 | 보령 꿀잼야행';
 const description = '밤길에 숨은 세 개의 징표를 찾아 황금 패랭이를 완성하는 보령 전통시장 모바일 미션';
 const url = 'https://market-run-boryeong.jlpartner.workers.dev/golden';
 const images = [{
-  url: 'https://market-run-boryeong.jlpartner.workers.dev/images/golden-main-banner.png',
+  url: 'https://market-run-boryeong.jlpartner.workers.dev/images/golden-share-preview.png',
   width: 1200,
   height: 630,
   alt: '황금 패랭이를 찾아라 – 보령 꿀잼야행',
