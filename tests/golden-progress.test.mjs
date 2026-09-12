@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { advance, allowed, fresh, key, normalize } from '../app/golden/progress.ts';
+import { advance, allowed, fresh, key, normalize, qrMissions } from '../app/golden/progress.ts';
 
 test('lanterns accept only the current clue and preserve saved progress', () => {
   let state = fresh();
@@ -26,17 +26,24 @@ test('legacy admin answers and internal spaces cannot bypass fixed lantern clues
   assert.equal(advance(1, '보 령', {lanterns: 2, goods: 0, seal: false}), null);
 });
 
-test('mission gates and configurable mission 2 sequence remain intact', () => {
-  assert.equal(advance(2, '251', fresh()), null);
+test('mission gates and fixed mission 2 sequence remain intact', () => {
+  assert.equal(advance(2, '125', fresh()), null);
   assert.equal(allowed(3, fresh()), false);
   const state = {lanterns: 3, goods: 0, seal: false};
-  assert.deepEqual(advance(2, '251', state), {...state, goods: 3});
+  assert.deepEqual(advance(2, '125', state), {...state, goods: 3});
   const config = {mission2Code: '739'};
   let sequential = state;
-  for (const digit of '739') sequential = advance(2, digit, sequential, config);
+  for (const digit of '125') sequential = advance(2, digit, sequential, config);
   assert.deepEqual(sequential, {...state, goods: 3});
   assert.equal(allowed(3, sequential), true);
   assert.equal(allowed(4, sequential), false);
   assert.equal(allowed(4, {...sequential, seal: true}), true);
   assert.deepEqual(normalize({...sequential, seal: true}), {...sequential, seal: true});
+});
+
+test('QR checkpoint tokens map to one mission each', () => {
+  assert.deepEqual(Object.values(qrMissions), [1, 2, 3]);
+  assert.equal(qrMissions['lantern-Q7m4K9v2R6'], 1);
+  assert.equal(qrMissions['three-tastes-N8c5W2p7H4'], 2);
+  assert.equal(qrMissions['golden-seal-T3x9B6k2M7'], 3);
 });
