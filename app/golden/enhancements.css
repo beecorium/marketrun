@@ -188,3 +188,7 @@
 }
 
 .g-finish > .g-eyebrow { font-size: 18.2px; }
+
+.g-heading .g-eyebrow { font-size: 14px; line-height: 1.35; }
+.g-tastes > span:not(.found) b { font-size: 20.8px; line-height: 1.3; white-space: nowrap; }
+.g-tastes small { font-size: 20.8px; line-height: 1.3; letter-spacing: -.04em; }
