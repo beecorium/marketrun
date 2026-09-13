@@ -31,6 +31,9 @@ test("renders the built golden page metadata in the Workers runtime", async () =
     const html = await response.text();
     assert.match(html, goldenTitle);
     assert.match(html, goldenDescription);
+    assert.match(html, /golden-share-preview-20260913\.png/i);
+    assert.match(html, /<meta(?=[^>]*\bproperty=["']og:image:width["'])(?=[^>]*\bcontent=["']1200["'])[^>]*>/i);
+    assert.match(html, /<meta(?=[^>]*\bproperty=["']og:image:height["'])(?=[^>]*\bcontent=["']630["'])[^>]*>/i);
   } finally {
     await worker.stop();
   }
