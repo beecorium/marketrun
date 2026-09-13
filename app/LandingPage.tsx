@@ -31,7 +31,7 @@ export default function Home() {
 
   return <main className="landing">
     <header className="landing-nav">
-      <a className="landing-brand" href="#top" aria-label="마켓런 홈"><span>MARKET</span><b>RUN</b><small>지역을 달리는 이야기</small></a>
+      <a className="landing-brand" href="#top" aria-label="마켓런 홈"><img src="/images/market-run-national-logo.png" alt="마켓런"/><small>전통 시장 활성화 프로젝트</small></a>
       <nav aria-label="주요 메뉴"><a href="#about">마켓런 소개</a><a href="#case">보령편 사례</a><a href="#process">도입 절차</a><a className="landing-nav-cta" href="#contact">운영 문의</a></nav>
     </header>
 
@@ -39,8 +39,8 @@ export default function Home() {
       <div className="landing-hero-bg" />
       <div className="landing-wrap landing-hero-copy">
         <p className="landing-kicker">LOCAL STORY MISSION PLATFORM</p>
-        <h1>시장을 걷고,<br/><span>지역을 기억하다.</span></h1>
-        <p className="landing-lead">마켓런은 지역의 역사·시장·사람을 하나의 이야기로 엮어 방문객이 직접 걷고 발견하는 모바일 미션 프로그램입니다.</p>
+        <h1>시장을 즐기고,<br/><span>지역을 기억하다.</span></h1>
+        <p className="landing-lead">마켓런은 지역의 역사·시장·사람을 하나의 이야기로 엮어 방문객이 직접 탐방하고 발견하는 모바일 미션 프로그램입니다.</p>
         <div className="landing-actions"><a className="landing-button" href="#contact">우리 지역 마켓런 문의하기 <ArrowRight size={19}/></a><a className="landing-button ghost" href="#case">보령편 사례 보기</a></div>
         <div className="landing-tags"><span>앱 설치 없음</span><span>QR 현장 참여</span><span>지역 맞춤 설계</span></div>
       </div>
@@ -57,7 +57,7 @@ export default function Home() {
     </div></section>
 
     <section className="landing-case" id="case"><div className="landing-wrap landing-case-grid">
-      <div><p className="landing-kicker gold">CASE 01 · BORYEONG</p><h2>황금 패랭이를 찾아라</h2><p>망루에서 반사 글자를 찾고, 한내시장에서 보령 3미를 해독한 뒤, 포목거리의 황금빛 단서를 따라 보부상을 깨우는 모바일 미션투어입니다.</p><div className="landing-stats"><div><b>30분</b><span>권장 참여 시간</span></div><div><b>4개</b><span>핵심 탐색 거점</span></div><div><b>3개</b><span>수집형 이야기 징표</span></div></div><a className="landing-text-link" href="/golden">보령편 미션 페이지 보기 <ArrowRight size={17}/></a></div>
+      <div><p className="landing-kicker gold">CASE 01 · BORYEONG</p><h2>황금 패랭이를 찾아라</h2><p>망루에서 반사 글자를 찾고, 한내시장에서 보령 3미를 해독한 뒤, 포목거리의 황금빛 단서를 따라 보부상을 깨우는 모바일 미션투어입니다.</p><div className="landing-stats"><div><b>30분</b><span>권장 참여 시간</span></div><div><b>4개</b><span>핵심 탐색 거점</span></div><div><b>3개</b><span>수집형 이야기 징표</span></div></div><a className="landing-text-link" href="/golden" target="_blank" rel="noopener noreferrer">보령편 미션 페이지 보기 <ArrowRight size={17}/></a></div>
       <figure><img src="/images/golden-main-banner.png" alt="보령 꿀잼야행 황금 패랭이를 찾아라"/></figure>
     </div></section>
 
@@ -90,6 +90,6 @@ export default function Home() {
       </div><label className="landing-consent"><input type="checkbox" required/><span>문의 응대를 위한 개인정보 수집·이용에 동의합니다. 입력 정보는 상담 목적으로만 사용합니다.</span></label><button className="landing-button" type="submit">이메일로 문의 보내기 <ArrowRight size={19}/></button></form>
     </div></section>
 
-    <footer className="landing-footer"><div className="landing-wrap"><b>MARKET RUN</b><p>지역의 길 위에 이야기를 심습니다.</p><span>© 2026 JL PARTNER. All rights reserved.</span></div></footer>
+    <footer className="landing-footer"><a className="landing-wrap landing-footer-link" href="http://jlpartner.co.kr" target="_blank" rel="noopener noreferrer"><span>마켓런은</span><img src="https://jlpartner.co.kr/jlpartner-logo.png" alt="IT 제일의 파트너"/><span>와 함께 합니다.</span></a></footer>
   </main>;
 }
